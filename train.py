@@ -39,7 +39,7 @@ def accuracy1(y_true, y_pred):
 def main(_):
     BSN=7
     learn_rate = 0.005
-    batchsize = 256
+    batchsize = 1024
     epoch = 1000
     opt = Adam(lr=learn_rate)#, beta_1=0.9, beta_2=0.999, epsilon=None, decay=0.0, amsgrad=False    
     opt1 = SGD(lr=learn_rate)#,decay=learn_rate / epoch)
@@ -51,23 +51,22 @@ def main(_):
     print(np.shape(trainX))
     input = Input(shape=(14,30,1))
     #input = Input(shape=(6,5,60,1))
-    predict = model_art.pred2_x(input)
+    predict = model_art.pred_step1(input)
     model = Model(inputs=input, outputs=predict)
     model.compile(optimizer=opt, loss=mse1, metrics=['accuracy',accuracy1])
     #model.load_weights('savemodel/64train1+1000.hdf5')
     model.summary()
-    checkpoint = ModelCheckpoint('savemodel/xxx+{epoch:02d}.hdf5',monitor='val_loss',verbose=1,
-                                 save_weights_only=True, save_best_only=False, period=50)
+    checkpoint = ModelCheckpoint('savemodel/step1+{epoch:02d}.hdf5',monitor='val_loss',verbose=1,
+                                 save_weights_only=True, save_best_only=False, period=200)
     # checkpoint = ModelCheckpoint('savemodel/cnnt+{epoch:02d}.hdf5',monitor='val_loss',verbose=1,
     #                              save_weights_only=True, save_best_only=False, period=10)
     earlystop = EarlyStopping(patience=10, verbose=1)
     tensorboard = TensorBoard(write_graph=True)
 
-    res = model.fit(trainX, trainY, steps_per_epoch=10000//5*4 //batchsize,epochs =epoch,callbacks=[checkpoint],validation_split=0.2,validation_steps=10000//5 //batchsize)
+    res = model.fit(trainX, trainY, steps_per_epoch=80000//5*4 //batchsize,epochs =epoch,callbacks=[checkpoint],validation_split=0.2,validation_steps=80000//5 //batchsize)
     loss_h=res.history['loss']
     np_loss=np.array(loss_h)
     np.savetxt('txt220.txt',np_loss)
-
 
 
 
